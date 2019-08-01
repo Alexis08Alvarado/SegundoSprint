@@ -14,7 +14,7 @@
   
   tasks:
 
-    - name: Escribir WWNs de0+ AIX
+    - name: Escribir WWNs de AIX
       shell: ssh -i automation-svc-lindley -l adminrep 10.0.1.102 svcinfo lsvdisk -unit gb | grep aaq | awk '{ print $2,$7,$8,$10 }' | tr " " "," > /tmp/reporte1-svc.csv
       delegate_to: localhost
 
@@ -36,4 +36,6 @@
           - "{{ archivoexcel2 }}" 
       # delegate_to: localhost 
       run_once: True 
+
+    - name: 
     
