@@ -11,6 +11,7 @@
     mail_body:        Reporte de Aceros Arequipa
     archivoexcel1:    /tmp/reporte1-svc.csv
     archivoexcel2:    /tmp/reporte2-svc.csv
+    archivoexcel3:    /tmp/reporte3-svc.csv
   
   tasks:
 
@@ -21,6 +22,19 @@
     - name: Escribir WWNs de AIX
       shell: ssh -i automation-svc-lindley -l adminrep 10.0.65.200 svcinfo lsvdisk -unit gb | grep aaq | awk '{ print $2,$7,$8,$10 }' | tr " " "," > /tmp/reporte2-svc.csv
       delegate_to: localhost
+
+    - name: Conectarse mediante PowerShell
+      shell: pwsh
+      delegate_to: localhost
+
+    - name: Conexión al servidor 
+      shell: Connect-VIServer -Server 172.23.1.29  -User GMDSA\aalvarado -Password Por*siempre0829
+      delegate_to: localhost
+    
+    - name: Guardar datos 
+      shell: get-vm  > /tmp/reporte3-svc.csv
+      delegate_to: localhost 
+
 
     - name: Enviar reporte por correo 
       mail: 
@@ -33,9 +47,8 @@
         body: "{{ mail_body }}" 
         attach: 
           - "{{ archivoexcel1 }}" 
-          - "{{ archivoexcel2 }}" 
+          - "{{ archivoexcel2 }}"
+          - "{{ archivoexcel3 }}" 
       # delegate_to: localhost 
       run_once: True 
-
-    - name: 
     
