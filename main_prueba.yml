@@ -35,7 +35,6 @@
       shell: get-vm  > /tmp/reporte3-svc.csv
       delegate_to: localhost 
 
-
     - name: Enviar reporte por correo 
       mail: 
         host: "{{ smtp_server }}" 
