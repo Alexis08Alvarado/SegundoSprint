@@ -48,6 +48,6 @@
           - "{{ archivoexcel1 }}" 
           - "{{ archivoexcel2 }}"
           - "{{ archivoexcel3 }}" 
-      # delegate_to: localhost 
+      #delegate_to: localhost 
       run_once: True 
     
