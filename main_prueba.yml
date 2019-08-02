@@ -12,6 +12,7 @@
     archivoexcel1:    /tmp/reporte1-svc.csv
     archivoexcel2:    /tmp/reporte2-svc.csv
     archivoexcel3:    /tmp/reporte3-svc.csv
+    archivoexcel4:    /tmp/reporte4-svc.csv
   
   tasks:
 
@@ -35,6 +36,14 @@
       shell: get-vm  > /tmp/reporte3-svc.csv
       delegate_to: localhost 
 
+    - name: Conexión al servidor 
+      shell: Connect-VIServer -Server 172.23.1.29  -User GMDSA\aalvarado -Password Por*siempre0829
+      delegate_to: localhost 
+
+    - name: Guardar datos 
+      shell: get-vm  > /tmp/reporte4-svc.csv
+      delegate_to: localhost  
+
     - name: Enviar reporte por correo 
       mail: 
         host: "{{ smtp_server }}" 
@@ -48,6 +57,7 @@
           - "{{ archivoexcel1 }}" 
           - "{{ archivoexcel2 }}"
           - "{{ archivoexcel3 }}" 
+          - "{{ archivoexcel4 }}"
       #delegate_to: localhost 
       run_once: True 
     
