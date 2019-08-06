@@ -1,0 +1,56 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    smtp_server:      10.100.13.31
+    mail_from:        Ansible Automation Platform <sysadmin@gmd.com.pe>
+    mail_to:          Alexis Alvarado <aalvarado@canvia.com>
+    mail_copy:        Infraestructura <rsaavedra@canvia.com>
+    mail_subject:     Reporte
+    mail_body:        Reporte de Aceros Arequipa
+    archivoexcel1:    ReporteCapacidadesCOT1.csv
+    archivoexcel2:    ReporteCapacidadesCOT4.csv
+    archivoexcel3:    ReporteMensual.csv
+  
+  tasks:
+
+    - name: Escribir WWNs de AIX
+      shell: |
+        echo "Lun Name, Group, Capacity, LUN ID" > {{ archivoexcel1 }} 
+        ssh -i automation-svc-lindley -l adminrep 10.0.1.102 svcinfo lsvdisk -unit gb | grep aaq | grep -v "[[:blank:]]rc" | awk '{ print $2,$7,$8,$10 }' | tr " " "," >> {{ archivoexcel1 }}
+        ssh -i automation-svc-lindley -l adminrep 10.0.1.102 svcinfo lsvdisk -unit gb | grep aaq | grep "[[:blank:]]rc" | awk '{ print $2,$7,$8,$12 }' | tr " " "," >> {{ archivoexcel1 }}
+      delegate_to: localhost
+
+    - name: Escribir WWNs de AIX
+      shell: |
+        echo "Lun Name, Group, Capacity, LUN ID" > {{ archivoexcel2 }}
+        ssh -i automation-svc-lindley -l adminrep 10.0.65.200 svcinfo lsvdisk -unit gb | grep aaq | grep -v "[[:blank:]]rc" | awk '{ print $2,$7,$8,$10 }' | tr " " "," >> {{ archivoexcel2 }}
+        ssh -i automation-svc-lindley -l adminrep 10.0.65.200 svcinfo lsvdisk -unit gb | grep aaq | grep "[[:blank:]]rc" | awk '{ print $2,$7,$8,$12 }' | tr " " "," >> {{ archivoexcel2 }}
+      delegate_to: localhost
+
+    - name: Generar reporte de Vmare Cot1 antiguos
+      shell: |
+        ./list_vcenters.ps1 172.23.1.29 "GMDSA\aalvarado" "Por*siempre0829" > {{ archivoexcel3 }}
+      delegate_to: localhost
+
+    - name: Convertir a excel
+      script: convertidor.py
+      delegate_to: localhost
+
+    - name: Enviar reporte por correo 
+      mail: 
+        host: "{{ smtp_server }}" 
+        port: 25 
+        from: "{{ mail_from }}" 
+        to: "{{ mail_to }}"
+        cc: "{{ mail_copy }}"
+        subject: "{{ mail_subject }}" 
+        body: "{{ mail_body }}" 
+        attach: 
+          - "{{ archivoexcel1 }}.xlsx" 
+          - "{{ archivoexcel2 }}.xlsx"
+          - "{{ archivoexcel3 }}.xlsx" 
+      #delegate_to: localhost 
+      run_once: True 
+    
