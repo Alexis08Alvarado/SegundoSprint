@@ -4,11 +4,12 @@
   gather_facts: no
   vars:
     smtp_server:      10.100.13.31
+    sshcmd:           ssh -q -n -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes -o PasswordAuthentication=no 
     mail_from:        Ansible Automation Platform <sysadmin@gmd.com.pe>
     mail_to:          Alexis Alvarado <aalvarado@canvia.com>
     mail_copy:        Infraestructura <rsaavedra@canvia.com>
-    mail_subject:     Reporte
-    mail_body:        Reporte de Aceros Arequipa
+    mail_subject:     Reporte Aceros Arequipa 
+    mail_body:        Reporte mensual de Aceros Arequipa
     archivoexcel1:    ReporteCapacidadesCOT1.csv
     archivoexcel2:    ReporteCapacidadesCOT4.csv
     archivoexcel3:    ReporteMensual1.csv
@@ -29,25 +30,25 @@
     - name: Escribir WWNs de AIX
       shell: |
         echo "Lun Name, Group, Capacity, LUN ID" > {{ archivoexcel1 }} 
-        ssh -i automation-svc-lindley -l adminrep 10.0.1.102 svcinfo lsvdisk -unit gb | grep aaq | grep -v "[[:blank:]]rc" | awk '{ print $2,$7,$8,$10 }' | tr " " "," >> {{ archivoexcel1 }}
-        ssh -i automation-svc-lindley -l adminrep 10.0.1.102 svcinfo lsvdisk -unit gb | grep aaq | grep "[[:blank:]]rc" | awk '{ print $2,$7,$8,$12 }' | tr " " "," >> {{ archivoexcel1 }}
+        {{ sshcmd }} -i automation-svc-lindley -l adminrep 10.0.1.102 svcinfo lsvdisk -unit gb | grep aaq | grep -v "[[:blank:]]rc" | awk '{ print $2,$7,$8,$10 }' | tr " " "," >> {{ archivoexcel1 }}
+        {{ sshcmd }} -i automation-svc-lindley -l adminrep 10.0.1.102 svcinfo lsvdisk -unit gb | grep aaq | grep "[[:blank:]]rc" | awk '{ print $2,$7,$8,$12 }' | tr " " "," >> {{ archivoexcel1 }}
       delegate_to: localhost
 
     - name: Escribir WWNs de AIX
       shell: |
         echo "Lun Name, Group, Capacity, LUN ID" > {{ archivoexcel2 }}
-        ssh -i automation-svc-lindley -l adminrep 10.0.65.200 svcinfo lsvdisk -unit gb | grep aaq | grep -v "[[:blank:]]rc" | awk '{ print $2,$7,$8,$10 }' | tr " " "," >> {{ archivoexcel2 }}
-        ssh -i automation-svc-lindley -l adminrep 10.0.65.200 svcinfo lsvdisk -unit gb | grep aaq | grep "[[:blank:]]rc" | awk '{ print $2,$7,$8,$12 }' | tr " " "," >> {{ archivoexcel2 }}
+        {{ sshcmd }} -i automation-svc-lindley -l adminrep 10.0.65.200 svcinfo lsvdisk -unit gb | grep aaq | grep -v "[[:blank:]]rc" | awk '{ print $2,$7,$8,$10 }' | tr " " "," >> {{ archivoexcel2 }}
+        {{ sshcmd }} -i automation-svc-lindley -l adminrep 10.0.65.200 svcinfo lsvdisk -unit gb | grep aaq | grep "[[:blank:]]rc" | awk '{ print $2,$7,$8,$12 }' | tr " " "," >> {{ archivoexcel2 }}
       delegate_to: localhost
 
     - name: Generar reporte de VCenter COT1 
       shell: |
-        ./list_vcenters.ps1 {{ vcenterip1 }} {{ vcusername1 }} {{ vcpassword1 }} > {{ archivoexcel3 }}
+         ./list_vcenters.ps1 {{ vcenterip1 }} {{ vcusername1 }} {{ vcpassword1 }} > {{ archivoexcel3 }}
       delegate_to: localhost
     
     - name: Generar reporte de VCenter COT 4
       shell: |
-        ./list_vcenters.ps1 {{ vcenterip2 }} {{ vcusername1 }} {{ vcpassword1 }} > {{ archivoexcel4 }}
+         ./list_vcenters.ps1 {{ vcenterip2 }} {{ vcusername1 }} {{ vcpassword1 }} > {{ archivoexcel4 }}
       delegate_to: localhost
 
     - name: Generar reporte de VCenter COT 1 LENOVO
@@ -57,8 +58,8 @@
 
     - name: Generar reporte de VCenter COT 4 LENOVO
       shell: |
-        ./list_vcenters.ps1 {{ vcenterip4 }} {{ vcusername2 }} {{ vcpassword2 }} > {{ archivoexcel6 }}
-      delegate_to: localhost
+         ./list_vcenters.ps1 {{ vcenterip4 }} {{ vcusername2 }} {{ vcpassword2 }} > {{ archivoexcel6 }}
+      delegate_to: localhost 
 
     - name: Convertir a excel
       script: convertidor.py
