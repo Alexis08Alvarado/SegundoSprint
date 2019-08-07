@@ -12,7 +12,10 @@
     archivoexcel1:    ReporteCapacidadesCOT1.csv
     archivoexcel2:    ReporteCapacidadesCOT4.csv
     archivoexcel3:    ReporteMensual.csv
-  
+    vcenterip:        172.23.1.29
+    vcusername:       GMDSA\\aalvarado
+    vcpassword:       Por*siempre0829
+    
   tasks:
 
     - name: Escribir WWNs de AIX
@@ -31,7 +34,7 @@
 
     - name: Generar reporte de Vmare Cot1 antiguos
       shell: |
-        ./list_vcenters.ps1 172.23.1.29 "GMDSA\aalvarado" "Por*siempre0829" > {{ archivoexcel3 }}
+        ./list_vcenters.ps1 {{ vcenterip }} {{ vcusername }} {{ vcpassword }} > {{ archivoexcel3 }}
       delegate_to: localhost
 
     - name: Convertir a excel
