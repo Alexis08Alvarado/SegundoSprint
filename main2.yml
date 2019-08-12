@@ -10,12 +10,10 @@
     mail_copy:        Infraestructura <rsaavedra@canvia.com>
     mail_subject:     Reporte Aceros Arequipa 
     mail_body:        Reporte mensual de Aceros Arequipa
-    archivoexcel1:    ReporteCapacidadesCOT1.csv
-    archivoexcel2:    ReporteCapacidadesCOT4.csv
-    archivoexcel3:    ReporteMensual1.csv
-    archivoexcel4:    ReporteMensual2.csv
-    archivoexcel5:    ReporteMensual3.csv
-    archivoexcel6:    ReporteMensual4.csv
+    archivoexcel1:    Reporte_CapacidadesCOT1.csv
+    archivoexcel2:    Reporte_CapacidadesCOT4.csv
+    archivoexcel3:    Reporte_Mensual_COT1_CLOUD.csv
+    archivoexcel4:    Reporte_Mensual_COT4_CLOUD.csv
     vcenterip1:       172.23.1.29
     vcenterip2:       172.23.1.34
     vcenterip3:       172.23.8.139
@@ -41,9 +39,17 @@
         {{ sshcmd }} -i automation-svc-lindley -l adminrep 10.0.65.200 svcinfo lsvdisk -unit gb | grep aaq | grep "[[:blank:]]rc" | awk '{ print $2,$7,$8,$12 }' | tr " " "," >> {{ archivoexcel2 }}
       delegate_to: localhost
 
-    - name: Generar reporte de VCenter COT1 
+    - name: Ejecutar script
+      shell: ./prueba.py Reporte_Capacidades_2019.xlsx {{ archivoexcel1 }} {{ archivoexcel2 }} COT1 COT4
+
+    - name: Generar reporte de VCenter COT1 antiguo
       shell: |
          ./list_vcenters.ps1 {{ vcenterip1 }} {{ vcusername1 }} {{ vcpassword1 }} > {{ archivoexcel3 }}
+      delegate_to: localhost
+
+    - name: Generar reporte de VCenter COT 1 LENOVO
+      shell: |
+        ./list_vcenters.ps1 {{ vcenterip3 }} {{ vcusername2 }} {{ vcpassword2 }} >> {{ archivoexcel3 }}
       delegate_to: localhost
     
     - name: Generar reporte de VCenter COT 4
@@ -51,15 +57,13 @@
          ./list_vcenters.ps1 {{ vcenterip2 }} {{ vcusername1 }} {{ vcpassword1 }} > {{ archivoexcel4 }}
       delegate_to: localhost
 
-    - name: Generar reporte de VCenter COT 1 LENOVO
-      shell: |
-        ./list_vcenters.ps1 {{ vcenterip3 }} {{ vcusername2 }} {{ vcpassword2 }} > {{ archivoexcel5 }}
-      delegate_to: localhost
-
     - name: Generar reporte de VCenter COT 4 LENOVO
       shell: |
-         ./list_vcenters.ps1 {{ vcenterip4 }} {{ vcusername2 }} {{ vcpassword2 }} > {{ archivoexcel6 }}
+         ./list_vcenters.ps1 {{ vcenterip4 }} {{ vcusername2 }} {{ vcpassword2 }} >> {{ archivoexcel4 }}
       delegate_to: localhost 
+
+    - name: Ejecutar script
+      shell: ./prueba.py Reporte_Vcenter_2019.xlsx {{ archivoexcel3 }} {{ archivoexcel4 }} COT1 COT4
 
     - name: Convertir a excel
       script: convertidor.py
@@ -75,12 +79,8 @@
         subject: "{{ mail_subject }}" 
         body: "{{ mail_body }}" 
         attach: 
-          - "{{ archivoexcel1 }}.xlsx" 
-          - "{{ archivoexcel2 }}.xlsx"
-          - "{{ archivoexcel3 }}.xlsx" 
-          - "{{ archivoexcel4 }}.xlsx"
-          - "{{ archivoexcel5 }}.xlsx"
-          - "{{ archivoexcel6 }}.xlsx"
+          - Reporte_Capacidades_2019.xlsx
+          - Reporte_Vcenter_2019.xlsx
       #delegate_to: localhost 
       run_once: True 
     
